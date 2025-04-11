@@ -1,0 +1,153 @@
+Starting BrowserQuest game server...
+world1 created (capacity: 200 players).
+world2 created (capacity: 200 players).
+world3 created (capacity: 200 players).
+world4 created (capacity: 200 players).
+world5 created (capacity: 200 players).
+listening on *:8000
+a user connected
+Updating population: 0 0
+Received dispatch request
+a user connected
+Updating population: 0 1
+Received: 0,maoni,21,60
+Received: 0,maoni,21,60
+maoni has joined world1
+Updating population: 1 2
+Received: 20,927,929,1020,1021,1022,1120,1121,1122,1220,1221,1222,1320,1321,1322,11920,11921,12120,12121,810235,815222,818209
+Received: 20,927,929,1020,1021,1022,1120,1121,1122,1220,1221,1222,1320,1321,1322,11920,11921,12120,12121,810235,815222,818209
+Pushed 21 new spawns to 5221
+Received: 4,12,223
+Received: 4,12,223
+maoni is moving to (12, 223).
+Received: 26,4
+Received: 26,4
+Received: 7,1322
+Received: 7,1322
+Received: 8,1322
+Received: 8,1322
+1322 is now attacking 5221
+Received: 9,1322
+Received: 9,1322
+Received: 8,1322
+Received: 8,1322
+Received: 9,1322
+Received: 9,1322
+Received: 8,1322
+Received: 8,1322
+Received: 9,1322
+Received: 9,1322
+Received: 8,1322
+Received: 8,1322
+Received: 9,1322
+Received: 9,1322
+Received: 8,1322
+Received: 8,1322
+Received: 9,1322
+Received: 9,1322
+Received: 8,1322
+Received: 8,1322
+Received: 9,1322
+Received: 9,1322
+Received: 8,1322
+Received: 8,1322
+5221 REMOVED ATTACKER 1322
+Removed rat : 1322
+Received: 5,12,226,936
+Received: 5,12,226,936
+maoni is moving to (12, 226).
+Received: 12,936
+Received: 12,936
+Removed flask : 936
+Received: 7,1321
+Received: 7,1321
+Received: 8,1321
+Received: 8,1321
+1321 is now attacking 5221
+Received: 9,1321
+Received: 9,1321
+Received: 8,1321
+Received: 8,1321
+Received: 9,1321
+Received: 9,1321
+Received: 8,1321
+Received: 8,1321
+Received: 9,1321
+Received: 9,1321
+Received: 8,1321
+Received: 8,1321
+Received: 9,1321
+Received: 9,1321
+Received: 9,1321
+Received: 9,1321
+Received: 8,1321
+Received: 8,1321
+Received: 9,1321
+Received: 9,1321
+Received: 8,1321
+Received: 8,1321
+5221 REMOVED ATTACKER 1321
+Removed rat : 1321
+Removed flask : 937
+maoni has left the game.
+Removed warrior : 5221
+a user connected
+Updating population: 0 0
+a user connected
+Updating population: 0 1
+Received: 0,maoni,21,60
+Received: 0,maoni,21,60
+maoni has joined world1
+Updating population: 1 2
+maoni has left the game.
+Removed warrior : 5733
+a user connected
+Updating population: 0 0
+Received: 0,maoni,21,60
+Received: 0,maoni,21,60
+maoni has joined world1
+Updating population: 1 1
+a user connected
+Updating population: 1 1
+Received: 20,926,928,1820,1821,12220,867220
+Received: 20,926,928,1820,1821,12220,867220
+Pushed 6 new spawns to 5314
+a user connected
+Updating population: 1 2
+Received: 0,asasasasasasasa,21,60
+Received: 0,asasasasasasasa,21,60
+asasasasasasasa has joined world1
+Updating population: 2 3
+Received: 20,927,929,1020,1021,1022,1120,1121,1122,1220,1221,1222,1320,1321,1322,11920,11921,12120,12121,810235,815222,818209
+Received: 20,927,929,1020,1021,1022,1120,1121,1122,1220,1221,1222,1320,1321,1322,11920,11921,12120,12121,810235,815222,818209
+Pushed 21 new spawns to 5926
+Received: 4,19,223
+Received: 4,19,223
+asasasasasasasa is moving to (19, 223).
+Received: 26,4
+Received: 26,4
+Received: 4,16,226
+Received: 4,16,226
+asasasasasasasa is moving to (16, 226).
+Received: 4,14,224
+Received: 4,14,224
+asasasasasasasa is moving to (14, 224).
+Received: 7,1321
+Received: 7,1321
+Received: 8,1321
+Received: 8,1321
+1321 is now attacking 5926
+Received: 9,1321
+Received: 9,1321
+Received: 9,1321
+Received: 9,1321
+Received: 8,1321
+Received: 8,1321
+Received: 9,1321
+Received: 9,1321
+Received: 8,1321
+Received: 8,1321
+asasasasasasasa has left the game.
+Removed warrior : 5926
+maoni has left the game.
+Removed warrior : 5314
