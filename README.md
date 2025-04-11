@@ -36,7 +36,7 @@ HOW TO RUN? (Docker)
 docker-compose up --build
 ```
 
-You can also see logs from load balancer (Which server you are on, if both are enable, what is happening in both server, ...) : 
+You can also see logs from both server using : 
 
 ```
 docker-compose logs -f browserquest1 browserquest2
