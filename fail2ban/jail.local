@@ -1,0 +1,26 @@
+# Jail pour la protection contre les erreurs HTTP 4xx
+[nginx-4xx]
+enabled = true
+filter = nginx-4xx
+logpath = /var/log/nginx/access.log
+maxretry = 5
+findtime = 600
+bantime = 3600
+
+# Jail pour la protection contre les tentatives d'authentification HTTP
+[nginx-auth]
+enabled = true
+filter = nginx-http-auth
+logpath = /var/log/nginx/access.log
+bantime = 3600
+findtime = 600
+maxretry = 5
+action = %(action_)s
+
+[sshd]
+enabled = true
+port = ssh
+logpath = /var/log/auth.log
+maxretry = 3  
+bantime = 600 
+findtime = 600

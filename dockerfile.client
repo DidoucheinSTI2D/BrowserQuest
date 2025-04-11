@@ -1,7 +1,10 @@
 FROM nginx:latest
 
+# Supprimer le contenu par défaut de Nginx
 RUN rm -rf /usr/share/nginx/html/*
 
+# Copier les fichiers du client
 COPY ./client/ /usr/share/nginx/html/
 
+# Copier les fichiers partagés
 COPY ./shared/ /usr/share/nginx/html/shared/
