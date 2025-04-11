@@ -1,8 +1,39 @@
-version: '3.8'
-
 services:
-  browserquest:
-    build: .
+  browserquest1:
+    build:
+      context: .
+      args:
+        PORT: 8001
+    environment:
+      - PORT=8001
+    expose:
+      - "8001"
+
+  browserquest2:
+    build:
+      context: .
+      args:
+        PORT: 8002
+    environment:
+      - PORT=8002
+    expose:
+      - "8002"
+
+  loadbalancer:
+    image: nginx:latest
+    volumes:
+     - ./nginx1.conf:/etc/nginx/nginx.conf
     ports:
       - "8000:8000"
+    depends_on:
+      - browserquest1
+      - browserquest2
+
+  frontend:
+    build:
+      context: .
+      dockerfile: dockerfile.client
+    ports:
       - "8080:80"
+
+

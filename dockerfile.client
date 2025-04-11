@@ -1,0 +1,7 @@
+FROM nginx:latest
+
+RUN rm -rf /usr/share/nginx/html/*
+
+COPY ./client/ /usr/share/nginx/html/
+
+COPY ./shared/ /usr/share/nginx/html/shared/
