@@ -45,9 +45,9 @@ define(['player', 'entityfactory', 'lib/bison'], function(Player, EntityFactory,
         },
         
         connect: function(dispatcherMode) {
-             var url = "http://" + this.host + ":" + this.port + "/",
+             var url = "ws://" + this.host + ":" + this.port + "/",
                 self = this;
-
+            console.log(url);
              
             this.connection = io(url, {
                 'force new connection': true,
