@@ -1,141 +1,165 @@
+const fs = require('fs');
+const Log = require('log');
+const _ = require('underscore');
+const Metrics = require('./metrics');
 
-var fs = require('fs'),
-    Metrics = require('./metrics');
- 
+let log = new Log('info');
 
 function main(config) {
-    var ws = require("./ws"),
-        WorldServer = require("./worldserver"),
-        Log = require('log'),
-        _ = require('underscore'),
-        server = new ws.socketIOServer(config.host, config.port),
-        metrics = config.metrics_enabled ? new Metrics(config) : null;
-        worlds = [],
-        lastTotalPlayers = 0,
-        checkPopulationInterval = setInterval(function() {
-            if(metrics && metrics.isReady) {
-                metrics.getTotalPlayers(function(totalPlayers) {
-                    if(totalPlayers !== lastTotalPlayers) {
+    try {
+        const ws = require('./ws');
+        const WorldServer = require('./worldserver');
+
+        if (!config || !config.host || !config.port || !config.nb_worlds) {
+            log.error("Configuration invalide : host, port, nb_worlds sont requis");
+            process.exit(1);
+        }
+
+        const server = new ws.socketIOServer(config.host, config.port);
+        const metrics = config.metrics_enabled ? new Metrics(config) : null;
+        const worlds = [];
+        let lastTotalPlayers = 0;
+
+        setInterval(() => {
+            if (metrics?.isReady) {
+                metrics.getTotalPlayers((totalPlayers) => {
+                    if (totalPlayers !== lastTotalPlayers) {
                         lastTotalPlayers = totalPlayers;
-                        _.each(worlds, function(world) {
-                            world.updatePopulation(totalPlayers);
-                        });
+                        worlds.forEach(world => world.updatePopulation(totalPlayers));
                     }
                 });
             }
         }, 1000);
-    
-    switch(config.debug_level) {
-        case "error":
-            log = new Log(console.log); break;
-        case "debug":
-            log = new Log(console.log); break;
-        case "info":
-            log = new Log(console.log); break;
-    };
-    
-    console.log("Starting BrowserQuest game server...");
-    
-    server.onConnect(function(connection) {
-        var world, // the one in which the player will be spawned
-            connect = function() {
-                if(world) {
-                    world.connect_callback(new Player(connection, world));
+
+        switch (config.debug_level) {
+            case "error":
+            case "debug":
+            case "info":
+                log = new Log(config.debug_level, process.stdout);
+                break;
+            default:
+                log = new Log('info', process.stdout);
+        }
+
+        console.log("Starting BrowserQuest game server...");
+
+        server.onConnect((connection) => {
+            try {
+                let world;
+
+                const connect = () => {
+                    if (world) {
+                        const Player = require('./player');
+                        world.connect_callback(new Player(connection, world));
+                    }
+                };
+
+                if (metrics) {
+                    metrics.getOpenWorldCount((openWorldCount) => {
+                        const openWorlds = _.first(worlds, openWorldCount);
+                        world = _.min(openWorlds, w => w.playerCount || 0);
+                        connect();
+                    });
+                } else {
+                    world = _.find(worlds, w => w.playerCount < config.nb_players_per_world);
+                    if (world) {
+                        world.updatePopulation();
+                        connect();
+                    } else {
+                        log.warning("Aucun monde disponible pour une nouvelle connexion.");
+                        connection.sendUTF8("server_full");
+                        connection.close();
+                    }
                 }
-            };
-        
-        if(metrics) {
-            metrics.getOpenWorldCount(function(open_world_count) {
-                // choose the least populated world among open worlds
-                world = _.min(_.first(worlds, open_world_count), function(w) { return w.playerCount; });
-                connect();
-            });
-        }
-        else {
-            // simply fill each world sequentially until they are full
-            world = _.detect(worlds, function(world) {
-                return world.playerCount < config.nb_players_per_world;
-            });
-            world.updatePopulation();
-            connect();
-        }
-    });
-
-    server.onError(function() {
-        console.log(Array.prototype.join.call(arguments, ", "));
-    });
-    
-    var onPopulationChange = function() {
-        metrics.updatePlayerCounters(worlds, function(totalPlayers) {
-            _.each(worlds, function(world) {
-                world.updatePopulation(totalPlayers);
-            });
+            } catch (err) {
+                log.error("Erreur lors de la connexion d'un client: " + err.message);
+            }
         });
-        metrics.updateWorldDistribution(getWorldDistribution(worlds));
-    };
 
-    _.each(_.range(config.nb_worlds), function(i) {
-        var world = new WorldServer('world'+ (i+1), config.nb_players_per_world, server);
-        world.run(config.map_filepath);
-        worlds.push(world);
-        if(metrics) {
-            world.onPlayerAdded(onPopulationChange);
-            world.onPlayerRemoved(onPopulationChange);
-        }
-    });
-    
-    server.onRequestStatus(function() {
-        return JSON.stringify(getWorldDistribution(worlds));
-    });
-    
-    if(config.metrics_enabled) {
-        metrics.ready(function() {
-            onPopulationChange(); // initialize all counters to 0 when the server starts
+        server.onError((...args) => {
+            console.error("Erreur serveur: ", ...args);
         });
+
+        const onPopulationChange = () => {
+            if (!metrics) return;
+            metrics.updatePlayerCounters(worlds, (totalPlayers) => {
+                worlds.forEach(world => world.updatePopulation(totalPlayers));
+            });
+            metrics.updateWorldDistribution(getWorldDistribution(worlds));
+        };
+
+        _.range(config.nb_worlds).forEach(i => {
+            const world = new WorldServer(`world${i + 1}`, config.nb_players_per_world, server);
+            world.run(config.map_filepath);
+            worlds.push(world);
+
+            if (metrics) {
+                world.onPlayerAdded(onPopulationChange);
+                world.onPlayerRemoved(onPopulationChange);
+            }
+        });
+
+        server.onRequestStatus(() => {
+            return JSON.stringify(getWorldDistribution(worlds));
+        });
+
+        if (metrics) {
+            metrics.ready(() => {
+                onPopulationChange();
+            });
+        }
+
+        process.on('uncaughtException', (e) => {
+            console.error("⛔ Uncaught Exception:", e.stack || e.message || e);
+        });
+
+        process.on('SIGINT', () => {
+            console.log("\nServeur arrêté proprement.");
+            process.exit(0);
+        });
+
+    } catch (error) {
+        console.error("Erreur critique au démarrage du serveur:", error.message);
+        process.exit(1);
     }
-    
-    process.on('uncaughtException', function (e) {
-        console.log('uncaughtException: ' + e);
-    });
 }
 
 function getWorldDistribution(worlds) {
-    var distribution = [];
-    
-    _.each(worlds, function(world) {
-        distribution.push(world.playerCount);
-    });
-    return distribution;
+    return worlds.map(world => world.playerCount || 0);
 }
 
 function getConfigFile(path, callback) {
-    fs.readFile(path, 'utf8', function(err, json_string) {
-        if(err) {
-            console.error("Could not open config file:", err.path);
+    fs.readFile(path, 'utf8', (err, data) => {
+        if (err) {
+            console.error(`❌ Impossible de lire le fichier de config ${path}:`, err.message);
+            return callback(null);
+        }
+
+        try {
+            const json = JSON.parse(data);
+            callback(json);
+        } catch (parseErr) {
+            console.error(`❌ Erreur de parsing JSON dans ${path}:`, parseErr.message);
             callback(null);
-        } else {
-            callback(JSON.parse(json_string));
         }
     });
 }
 
-var defaultConfigPath = './server/config.json',
-    customConfigPath = './server/config_local.json';
+const defaultConfigPath = './server/config.json';
+let customConfigPath = './server/config_local.json';
 
-process.argv.forEach(function (val, index, array) {
-    if(index === 2) {
-        customConfigPath = val;
-    }
-});
+if (process.argv[2]) {
+    customConfigPath = process.argv[2];
+}
 
-getConfigFile(defaultConfigPath, function(defaultConfig) {
-    getConfigFile(customConfigPath, function(localConfig) {
-        if(localConfig) {
+getConfigFile(defaultConfigPath, (defaultConfig) => {
+    getConfigFile(customConfigPath, (localConfig) => {
+        if (localConfig) {
             main(localConfig);
-        } else if(defaultConfig) {
+        } else if (defaultConfig) {
             main(defaultConfig);
         } else {
-            console.error("Server cannot start without any configuration file.");
+            console.error("❌ Aucune configuration valide trouvée. Arrêt du serveur.");
             process.exit(1);
         }
     });
